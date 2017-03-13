@@ -1,0 +1,93 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Ghiyath Alazzah</title>
+    <script src="jquery-1.7.1.min.js"></script>
+    <script src="jquery.mousewheel-min.js"></script>
+    <script src="jquery.terminal.min.js"></script>
+    <link href="jquery.terminal.css" rel="stylesheet"/>
+  </head>
+<body>
+<script>
+ $(function() {
+    var anim = false;
+    function typed(finish_typing) {
+        return function(term, message, delay, finish) {
+            anim = true;
+            var prompt = term.get_prompt();
+            var c = 0;
+            term.set_prompt('>');
+            if (message.length > 0) {
+                term.set_prompt('');
+                var interval = setInterval(function() {
+                    term.insert(message[c++]);
+                    if (c == message.length) {
+                        clearInterval(interval);
+                        // execute in next interval
+                        setTimeout(function() {
+                            // swap command with prompt
+                            finish_typing(term, message, prompt);
+                            anim = false
+                            finish && finish();
+                        }, delay);
+                    }
+                }, delay);
+            }
+        };
+    }
+    var typed_prompt = typed(function(term, message, prompt) {
+        // swap command with prompt
+        term.set_command('');
+        term.set_prompt(message + ' ');
+    });
+    var typed_message = typed(function(term, message, prompt) {
+        term.set_command('');
+        term.echo(message)
+        term.set_prompt(prompt);
+    });
+    $('body').terminal(function(command, term) {
+        if (command == 'help'){
+          term.echo(' email :   send me an email\n resume:   view my resume\n li:       view my LinkedIn\n git:      view my GitHub');
+        } 
+        else if (command == 'email'){
+          term.echo('You can reach me at: ghiyath28@gmail.com');
+          window.location.href = "mailto:ghiyath28@gmail.com";
+        }
+        else if (command == 'li'){
+          term.echo('You can find my LinkedIn at: www.linkedin.com/in/galazzah');
+          window.open("http://linkedin.com/in/galazzah", '_blank');
+        }
+        else if (command == 'git'){
+          term.echo('You can find my GitHub at: www.github.com/galazzah');
+          window.open("http://github.com/galazzah");
+        }
+        else if (command == ''){
+        }
+        else if (command == 'resume'){
+          window.open('GhiyathAlazzahResume.pdf');
+        }
+        else {
+            term.echo("unknown command: " + command);
+        }
+    }, {
+        name: 'xxx',
+        greetings: null,
+        width: $( window ).width(),
+        height: 500,
+        onInit: function(term) {
+            // first question
+            term.set_prompt('>');
+            term.echo('> info');
+            var msf = " Hi there!\n My name is Ghiyath\n I'm a 20 year old Silicon Valley native currently pursuing my B.S. in Computer Science from UC Irvine\n Type 'help' to see a list of options"
+            typed_message(term, msf, 40);
+        },
+        keydown: function(e) {
+            //disable keyboard when animating
+            if (anim) {
+                return false;
+            }
+        }
+    });
+});
+</script>
